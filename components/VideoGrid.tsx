@@ -28,9 +28,9 @@ export default function VideoGrid({ initialUrls, onRemoveUrl }: VideoGridProps) 
   );
   const [activeVideoId, setActiveVideoId] = useState<string | null>(videoItems[0]?.id || null);
 
-  const gridRef = useRef<HTMLDivElement>(null); // Grid fullscreen
+  const gridRef = useRef<HTMLDivElement>(null); // Fullscreen ref
 
-  // Sync state with props
+  // Sync internal state with parent props
   useEffect(() => {
     const newVideoItems = initialUrls
       .map((url) => ({ url, id: extractVideoId(url) }))
@@ -57,7 +57,7 @@ export default function VideoGrid({ initialUrls, onRemoveUrl }: VideoGridProps) 
   // Grid drop zone
   const [{ isOver }, drop] = useDrop({
     accept: 'video',
-    collect: (monitor: { isOver: () => any; }) => ({ isOver: monitor.isOver() }),
+    collect: (monitor: { isOver: () => any }) => ({ isOver: monitor.isOver() }),
     drop: () => {},
   });
 
@@ -69,21 +69,25 @@ export default function VideoGrid({ initialUrls, onRemoveUrl }: VideoGridProps) 
     if (activeVideoId === extractVideoId(url)) setActiveVideoId(newItems[0]?.id || null);
   };
 
-  // Grid fullscreen
+  // Fullscreen for entire grid
   const handleGridFullscreen = () => {
     if (!gridRef.current) return;
 
+    const elem = gridRef.current;
     if (!document.fullscreenElement) {
-      gridRef.current.requestFullscreen().catch((err) => console.error(err));
+      elem.requestFullscreen().catch((err) => console.error('Fullscreen request failed:', err));
     } else {
-      document.exitFullscreen().catch((err) => console.error(err));
+      document.exitFullscreen().catch((err) => console.error('Exiting fullscreen failed:', err));
     }
   };
 
-  const gridCols = 'grid-cols-2 sm:grid-cols-2'; // Fixed 2 columns
+  const gridCols = 'grid-cols-2'; // 2-column grid
 
   return (
-    <div ref={gridRef} className="relative">
+    <div
+      ref={gridRef}
+      className="relative w-full h-full overflow-auto bg-gray-900 scrollbar-none"
+    >
       <div
         ref={drop}
         className={`grid ${gridCols} gap-4 p-4 max-w-7xl mx-auto ${isOver ? 'opacity-75' : ''}`}
@@ -106,7 +110,7 @@ export default function VideoGrid({ initialUrls, onRemoveUrl }: VideoGridProps) 
         )}
       </div>
 
-      {/* Fullscreen Grid Button */}
+      {/* Fullscreen button for grid */}
       <button
         onClick={handleGridFullscreen}
         className="fixed bottom-4 right-4 z-50 p-3 bg-blue-600 text-white rounded-full hover:bg-blue-700 shadow-lg"
@@ -118,7 +122,7 @@ export default function VideoGrid({ initialUrls, onRemoveUrl }: VideoGridProps) 
   );
 }
 
-// Draggable video wrapper
+// Draggable video component
 function DraggableVideoPlayer({
   index,
   item,
@@ -138,7 +142,7 @@ function DraggableVideoPlayer({
 
   const [{ handlerId, isOver }, drop] = useDrop({
     accept: 'video',
-    collect: (monitor: { getHandlerId: () => any; isOver: () => any; }) => ({
+    collect: (monitor: { getHandlerId: () => any; isOver: () => any }) => ({
       handlerId: monitor.getHandlerId?.(),
       isOver: monitor.isOver(),
     }),
@@ -165,7 +169,7 @@ function DraggableVideoPlayer({
   const [{ isDragging }, drag] = useDrag({
     type: 'video',
     item: () => ({ id: item.id, index }),
-    collect: (monitor: { isDragging: () => any; }) => ({ isDragging: monitor.isDragging() }),
+    collect: (monitor: { isDragging: () => any }) => ({ isDragging: monitor.isDragging() }),
   });
 
   drag(drop(ref));

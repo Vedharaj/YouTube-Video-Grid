@@ -32,16 +32,13 @@ export default function VideoPlayer({
       if (!apiKey) return;
 
       try {
-        const response = await axios.get(
-          'https://www.googleapis.com/youtube/v3/videos',
-          {
-            params: {
-              id: videoId,
-              key: apiKey,
-              part: 'snippet',
-            },
-          }
-        );
+        const response = await axios.get('https://www.googleapis.com/youtube/v3/videos', {
+          params: {
+            id: videoId,
+            key: apiKey,
+            part: 'snippet',
+          },
+        });
         const video = response.data.items?.[0];
         setChannelName(video?.snippet?.channelTitle || 'Unknown Channel');
       } catch (error) {
@@ -49,7 +46,6 @@ export default function VideoPlayer({
         setChannelName('Unknown Channel');
       }
     };
-
     fetchChannelName();
   }, [videoId]);
 
@@ -93,18 +89,14 @@ export default function VideoPlayer({
     setIsMuted(!isMuted);
   }, [player, isMuted]);
 
-  // Individual fullscreen
+  // Fullscreen individual video
   const handleFullscreen = () => {
     if (!iframeRef.current) return;
 
     if (!document.fullscreenElement) {
-      iframeRef.current.requestFullscreen().catch((err) => {
-        console.error('Fullscreen request failed:', err);
-      });
+      iframeRef.current.requestFullscreen().catch((err) => console.error(err));
     } else {
-      document.exitFullscreen().catch((err) => {
-        console.error('Exiting fullscreen failed:', err);
-      });
+      document.exitFullscreen().catch((err) => console.error(err));
     }
   };
 
@@ -138,7 +130,7 @@ export default function VideoPlayer({
           e.stopPropagation();
           handleFullscreen();
         }}
-        className="absolute bottom-10 right-2 p-2 bg-gray-800 bg-opacity-70 text-white rounded-full hover:bg-gray-700 transition-colors"
+        className="absolute top-2 left-2 p-2 bg-gray-800 bg-opacity-70 text-white rounded-full hover:bg-gray-700 transition-colors"
         title="Fullscreen Video"
       >
         ⛶
